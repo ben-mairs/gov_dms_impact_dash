@@ -131,6 +131,12 @@ df_csab20_21 = df_csab20_21[df_csab20_21['City'].isin(to_drop) == False]
 # check for cities that won't merge cleanly
 # list(set(df_csab20_21['City'].to_list()).difference(list(set(df_geo_city['City'].to_list()))))
 
+# uppercase cities for merge
+df_csab20_21['City'] = df_csab20_21['City'].str.upper()
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_csab20_21['City'] = df_csab20_21['City'].str.strip()
+
 # aggregate CSAB data to the city level in preparation for merge
 df_csab20_21_agg = df_csab20_21.groupby(df_csab20_21['City'
                                                      ].str.upper()
@@ -204,6 +210,9 @@ df_disb20_21['E911 Disbursements'] = (
                                      df_disb20_21['Special']
                                      )
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_disb20_21['County'] = df_disb20_21['County'].str.strip()
+
 # add 'County' to county field for merge prep
 df_disb20_21['County'] = df_disb20_21['County'] + ' County'
 
@@ -238,6 +247,9 @@ df_erate = df_erate[['County', 'Total Authorized Disbursement']]
 df_erate['E-Rate Disbursements'] = df_erate['Total Authorized Disbursement'
                                             ].str.lstrip('$')
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_erate['County'] = df_erate['County'].str.strip()
+
 # add county name with space to match with df_geo-county
 df_erate['County'] = df_erate['County'] + ' County'
 
@@ -258,17 +270,14 @@ df_erate_agg = df_erate.groupby(['County'
 # df_erate_agg['E-Rate Disbursements'].sum()
 
 # check for counties that won't merge cleanly
+# df_erate_agg[df_erate_agg['County'] == np.nan]
 # list(set(df_erate_agg['County'].to_list()).difference(list(set(df_geo_county['County'].to_list()))))
 
 # merge with df_geo_county to attach county names
 df_county20_21 = pd.merge(left=df_county20_21, right=df_erate_agg,
                           left_on='County', right_on='County', how='left')
 
-# fill na one more time to get rid of NaNs
 # df_county20_21.head()
-
-
-
 
 # In[3]:
 
@@ -297,6 +306,9 @@ df_towers_agg = df_towers.groupby(['County']).agg({'Name': 'count'}).reset_index
 # rename to desired metric name
 df_towers_agg.rename(columns={'Name': 'SLERS Towers'},
                      inplace=True)
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_towers_agg['County'] = df_towers_agg['County'].str.strip()
 
 # add county to names of counties for merge
 df_towers_agg['County'] = df_towers_agg['County'] + ' County'
@@ -339,6 +351,9 @@ df_grants20_21.rename(columns={'FinalAward': 'Grants Awarded',
                                },
                       inplace=True)
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_grants20_21['County'] = df_grants20_21['County'].str.strip()
+
 # add county to county name
 df_grants20_21['County'] = df_grants20_21['County'] + ' County'
 
@@ -369,6 +384,9 @@ df_county20_21 = pd.merge(left=df_county20_21, right=df_grants20_21_agg,
 # import psap data
 # doesn't chage Y2Y
 df_psap20_21 = pd.read_excel('Divisions/Divtel- PSAP/FY2021-2022/DivTel PSAP_Impacts_YTD.xlsx')
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_psap20_21['County'] = df_psap20_21['County'].str.strip()
 
 # add county to county name
 # city data is too sparse to use
@@ -528,10 +546,6 @@ df_himis_agg_2020.reset_index(inplace=True)
 
 df_himis_agg_2020.replace(to_replace=to_replace, inplace=True)
 
-
-# In[7]:
-
-
 # ready to group and agg in preparation for merge with df_geo_city
 df_himis_agg_2020 = df_himis_agg_2020.groupby([
                                                'City']).agg({'Total Medical Spend':
@@ -543,6 +557,10 @@ df_himis_agg_2020 = df_himis_agg_2020.groupby([
 
 # rename city to avoid duplication after the merge
 df_himis_agg_2020.rename(columns={'city': 'City'}, inplace=True)
+
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_himis_agg_2020['City'] = df_himis_agg_2020['City'].str.strip()
 
 # merge with df_geo_city to attach district, county, etc information
 # at the bottom; last step
@@ -570,12 +588,10 @@ df_city20_21.rename(columns={'Total MFMP Spend': 'MyFloridaMarketPlace',
 
 # df_city20_21.head()
 
-
-
 # In[8]:
 
 # ### DSS
-# Metrics: Fleet Maintenance Cost, Fuel Cost, Private Prison Contract Spend, 
+# Metrics: Fleet Maintenance Cost, Fuel Cost, Private Prison Contract Spend,
 # Federal Surplus Savings
 
 # #### FLEET
@@ -600,7 +616,11 @@ df_fleet20_21 = df_fleet20_21.iloc[0:31655, :]
 # replace dashes in TOTAL FUEL COSTS with zero
 df_fleet20_21.replace('--', 0, inplace=True)
 
+# make regular replacements
 df_fleet20_21.replace(to_replace=to_replace, inplace=True)
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_fleet20_21['City'] = df_fleet20_21['City'].str.strip()
 
 # aggregate to city level here so tableau doesn't have to
 # only need city column, others will be duplicated in merge with final
@@ -715,6 +735,9 @@ df_leso20_21.replace(to_replace=to_replace, inplace=True)
 # check to see which cities won't make the merge
 # list(set(df_leso20_21['City'].to_list()).difference(list(set(df_geo_city['City'].to_list()))))
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_leso20_21['City'] = df_leso20_21['City'].str.strip()
+
 # group and agg to the city level
 df_leso_agg20_21 = df_leso20_21.groupby(['City']
                                         ).agg({'Savings': 'sum',
@@ -740,19 +763,40 @@ df_city20_21.rename(columns={'Total Quantity\nof Items':
 # In[11]:
 
 # #### SASP
-# Metrics: SASP Savings
-# warning, this dataset is a bit of a clusterfk
-# names in city file are close to raw file, but not always close
-# some names were manually adjusted in the excel file
+# Metrics: SASP Savings, SASP Items
 
-# import raw file
-df_sasp20_21 = pd.read_excel('Divisions/DSS-SASP/FY2020-2021/DSS SASP FY 20-21.xlsx',
-                             skipfooter=1)
-# df_sasp20_21.columns
+# import and list columns
+df_sasp20_21 = pd.read_csv('Divisions/DSS-SASP/FY2020-2021/Donee Savings AMP 6-15-2022.csv')
 
-# df_sasp20_21['Donee Savings SUM'].sum()
+# df_sasp20_21.dtypes
 
+# preview dataset
 # df_sasp20_21.head()
+
+# only get columns we need: acquisition costs - savings, names, line items
+df_sasp20_21 = df_sasp20_21[['Donee Account Name', 'Line Items',
+                             'Direct A/C', 'Federal A/C', 'Overseas A/C',
+                             'Total Service Charge']]
+
+# remove dollar signs from necessary variables
+df_sasp20_21['Direct A/C'] = df_sasp20_21['Direct A/C'].str.lstrip('$')
+df_sasp20_21['Federal A/C'] = df_sasp20_21['Federal A/C'].str.lstrip('$')
+df_sasp20_21['Overseas A/C'] = df_sasp20_21['Overseas A/C'].str.lstrip('$')
+df_sasp20_21['Total Service Charge'] = df_sasp20_21['Total Service Charge'].str.lstrip('$')
+
+# remove commas from numeric variables
+df_sasp20_21['Direct A/C'] = df_sasp20_21['Direct A/C'].str.replace(',', '', regex=True)
+df_sasp20_21['Federal A/C'] = df_sasp20_21['Federal A/C'].str.replace(',', '', regex=True)
+df_sasp20_21['Overseas A/C'] = df_sasp20_21['Overseas A/C'].str.replace(',', '', regex=True)
+df_sasp20_21['Total Service Charge'] = df_sasp20_21['Total Service Charge'].str.replace(',', '', regex=True)
+
+# convert dtypes to float so math will work
+df_sasp20_21['Direct A/C'] = df_sasp20_21['Direct A/C'].astype(float)
+df_sasp20_21['Federal A/C'] = df_sasp20_21['Federal A/C'].astype(float)
+df_sasp20_21['Overseas A/C'] = df_sasp20_21['Overseas A/C'].astype(float)
+df_sasp20_21['Total Service Charge'] = df_sasp20_21['Total Service Charge'].astype(float)
+
+df_sasp20_21['SASP Savings'] = (df_sasp20_21['Direct A/C'] + df_sasp20_21['Federal A/C'] + df_sasp20_21['Overseas A/C']) - df_sasp20_21['Total Service Charge']
 
 # import donee locations to attach to first dataset
 df_donees = pd.read_csv('Divisions/DSS-SASP/FY2020-2021/Donee City/Donee City FY 20-21.csv')
@@ -761,16 +805,6 @@ df_donees = pd.read_csv('Divisions/DSS-SASP/FY2020-2021/Donee City/Donee City FY
 
 # df_donees.head()
 
-# merge not working, issue is the Cxxxxxx on the end of sasp data
-# need to remove, obv
-df_sasp20_21['Donee Account Name'] = df_sasp20_21['Donee Name'].str.extract('(.+)C\d+')
-
-# make it uppercase
-df_sasp20_21['Donee Account Name'] = df_sasp20_21['Donee Account Name'].str.upper()
-
-# spaces on right side were causing merge issues
-df_donees['Donee Account Name'] = df_donees['Donee Account Name'].str.rstrip(' ')
-df_sasp20_21['Donee Account Name'] = df_sasp20_21['Donee Account Name'].str.rstrip(' ')
 
 # group account names from donee file so rows aren't duplicated
 df_donees = df_donees.groupby(by=['Donee Account Name']).agg({'City':
@@ -780,48 +814,38 @@ df_donees = df_donees.groupby(by=['Donee Account Name']).agg({'City':
 # check for cities that didn't make it
 # list(set(df_sasp20_21['Donee Account Name'].to_list()).difference(list(set(df_donees['Donee Account Name'].to_list()))))
 
-# check for cities that didn't make it
-# list(set(df_donees['Donee Account Name'].to_list()).difference(list(set(df_sasp20_21['Donee Account Name'].to_list()))))
-
 # merge to attach city names to sasp data
 df_sasp20_21 = pd.merge(left=df_sasp20_21, left_on='Donee Account Name',
                         right=df_donees, right_on='Donee Account Name',
                         how='left')
 
-# df_sasp20_21['Donee Savings SUM'].sum()
+# df_sasp20_21.head()
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_sasp20_21['City'] = df_sasp20_21['City'].str.strip()
 
-# df_sasp20_21.columns
+# replace where appropriate, just added to master replace file
+df_sasp20_21.replace(to_replace=to_replace, inplace=True)
 
-# narrow down to columns we need
-df_sasp20_21 = df_sasp20_21[['Item Name', 'Donee Savings SUM', 'City']]
-
-
-# check for cities that didn't make it
-# list(set(df_sasp20_21['City'].to_list()).difference(list(set(df_geo_city['City'].to_list()))))
+# drop the ones that were ambiguous or not in FL
+df_sasp20_21 = df_sasp20_21[df_sasp20_21['City'].isin(to_drop) == False]
 
 # group and agg to the city level
 df_sasp20_21_agg = df_sasp20_21.groupby(['City']).agg({
-                                                       'Item Name': 'count',
-                                                       'Donee Savings SUM':
+                                                       'Line Items': 'count',
+                                                       'SASP Savings':
                                                        'sum',
                                                        }).reset_index()
-
-# df_sasp20_21_agg['Donee Savings SUM'].sum()
 
 df_city20_21 = pd.merge(left=df_city20_21, left_on='City',
                         right=df_sasp20_21_agg, right_on='City',
                         how='left')
 
-df_city20_21.rename(columns={'Donee Savings SUM': 'SASP Savings',
-                             'Item Name': 'SASP Items'
-                             },
-                    inplace=True)
-
+# list(set(df_sasp20_21_agg['City'].to_list()).difference(list(set(df_geo_city['City'].to_list()))))
 
 # df_city20_21['SASP Savings'].sum()
 
-df_city20_21.head()
+# df_city20_21.head()
 
 # In[12]:
 
@@ -855,6 +879,9 @@ df_mfmp20_21.rename(columns={'Supplier Location - PO City': 'City',
 
 # capitalize city for eventual merge
 df_mfmp20_21['City'] = df_mfmp20_21['City'].str.upper()
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_mfmp20_21['City'] = df_mfmp20_21['City'].str.strip()
 
 # go ahead and do all replacements, adding new ones
 df_mfmp20_21.replace(to_replace=to_replace, inplace=True)
@@ -906,7 +933,7 @@ df_city20_21 = pd.merge(left=df_city20_21, left_on='City',
 # ### OSD
 # Metrics: Number of Minority-Owned Businesses Registered
 
-df_osd20_21 = pd.read_excel('Divisions/OSD/FY2021-2022/OSD Certified Vendor File.xlsx')
+df_osd20_21 = pd.read_csv('Divisions/OSD/FY2020-2021/OSD FY 2020-2021.csv')
 
 # df_osd20_21.columns
 
@@ -915,63 +942,50 @@ df_osd20_21 = pd.read_excel('Divisions/OSD/FY2021-2022/OSD Certified Vendor File
 
 # missing_data(df_osd20_21)
 
-# only grab registrations active for FY 19-20
-# generate dates for entire FY
-rng = pd.date_range('07-01-2020', '06-30-2021', periods=365).to_frame()
-
-# place in datframe
-df_FY20_21 = pd.DataFrame(rng[0].astype(str)).reset_index()
-
-# split the date component and the time component
-df_FY20_21['Time'] = df_FY20_21[0].str.split(' ')
-# grab the date portion
-df_FY20_21['Time'] = df_FY20_21['Time'].str[0]
-
-# place in a list
-wrong_format = df_FY20_21['Time'].to_list()
-
-# must change to our precious format
-FY20_21 = []
-
-# change to match OSD date format
-for i in wrong_format:
-    temp = i.split('-')
-    FY20_21.append(temp[1]+'/'+temp[2]+'/'+temp[0])
-# if date is in our range, grab it 
-
-
-def inYear(row):
-    if (row['Effective On'] in FY20_21) or (row['Expire On'] in FY20_21):
-        return '1'
-    else:
-        return '0'
-
-
-# apply a marker to our df that we can use to filter it
-df_osd20_21['Indic'] = df_osd20_21.apply(inYear, axis=1)
-
-df_osd20_21 = df_osd20_21[df_osd20_21['Indic'] == '1']
-
-# we should be getting at least 4 businesses
-# df_osd20_21.head()
+# drop duplicate business names -- multiple owners etc
+df_osd20_21 = df_osd20_21.drop_duplicates(subset=['Tax ID'])
 
 # conver to upper to match df_geo
 df_osd20_21['City'] = df_osd20_21['City'].str.upper() 
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_osd20_21['City'] = df_osd20_21['City'].str.strip()
+
 
 # replace cities that won't make the merge
 # because they don't appear in df_geo_city
 df_osd20_21.replace(to_replace=to_replace, inplace=True)
 
+df_osd20_21.replace(to_replace={'TALLAHASEE': 'TALLAHASSEE',
+                                'PALM SPRINGS': 'LAKE WORTH',
+                                'PEMBROKE PARK': 'PEMBROKE PINES',
+                                'FT. LAUDERDALE': 'FT LAUDERDALE',
+                                'MAMI GARDENS,': 'MIAMI GARDENS',
+                                'ST CLOUD': 'SAINT CLOUD',
+                                'LANDOLAKES': 'LAND O LAKES',
+                                'ORANGE PARK,FL': 'JACKSONVILLE',
+                                'TALLAHASSEE, FL': 'TALLAHASSEE',
+                                'JACKSONVILLE, FL': 'JACKSONVILLE',
+                                'BIG PINE': 'BIG PINE KEY',
+                                'HERNANDO BEACH': 'HERNANDO',
+                                'N. LAUDERDALE': 'FT LAUDERDALE',
+                                'FERN': 'FERN PARK',
+                                'LONGWOOD, FL': 'LONGWOOD'
+                                }, inplace=True)
+
 # drop known-issue cities
 df_osd20_21 = df_osd20_21[df_osd20_21['City'].isin(to_drop) == False]
 
+# strip spaces off city column
+df_osd20_21['City'] = df_osd20_21['City'].str.strip()
+
 # group and agg to the city level
-df_osd20_21_agg = df_osd20_21.groupby(['City']).agg({'Name':
+df_osd20_21_agg = df_osd20_21.groupby(['City']).agg({'Company Name':
                                                      'count'}
                                                     ).reset_index()
 
 # rename to match other years
-df_osd20_21_agg.rename(columns={'Name':
+df_osd20_21_agg.rename(columns={'Company Name':
                                 'Minority-Owned Businesses Registered'},
                        inplace=True)
 
@@ -1035,7 +1049,11 @@ def convertSalary2(row):
         return convertSalary(row)
 
 
+# apply functions
 df_pf20_21['Annualized Salary'] = df_pf20_21.apply(convertSalary2, axis=1)
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_pf20_21['Location City'] = df_pf20_21['Location City'].str.strip()
 
 # go ahead and do all replacements, adding new ones
 df_pf20_21.replace(to_replace=to_replace, inplace=True)
@@ -1117,7 +1135,11 @@ df_pf20_21 = df_pf20_21[(df_pf20_21['Employee Type'] == 4) | (df_pf20_21['Employ
 
 df_pf20_21 = df_pf20_21[['Agency Name', 'Pos Num (8 Digits)', 'Location City', 'Vacant']]
 
+# make usual replacements
 df_pf20_21.replace(to_replace=to_replace, inplace=True)
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_pf20_21['Location City'] = df_pf20_21['Location City'].str.strip()
 
 # drop known issue cities
 df_pf20_21 = df_pf20_21[df_pf20_21['Location City'].isin(to_drop) == False]
@@ -1188,6 +1210,9 @@ df_redm20_21.rename(columns={'Gross Sq Ft': 'Owned Square Footage',
 # capitalize facility city
 df_redm20_21['City'] = df_redm20_21['City'].str.upper()
 
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_redm20_21['City'] = df_redm20_21['City'].str.strip()
+
 # replace county names that didn't make it into the merge
 df_redm20_21.replace(to_replace=to_replace, inplace=True)
 
@@ -1203,7 +1228,7 @@ df_redm20_21_agg = df_redm20_21.groupby(['City'
                                                  'Structure Value':
                                                  'sum'
                                                  }).reset_index()
-                                                 
+
 df_redm20_21_agg.rename(columns={'ID': 'Facilities Owned'}, inplace=True)
 # ready for merge
 
@@ -1231,6 +1256,9 @@ df_om20_21 = pd.read_excel('Divisions/REDM-Maintenance/FY2020-2021/REDM Maintena
 
 # upper case city name
 df_om20_21['City'] = df_om20_21['City'].str.upper()
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_om20_21['City'] = df_om20_21['City'].str.strip()
 
 # only get columns we need
 df_om20_21 = df_om20_21[['City', 'Category', 'Amount']]
@@ -1277,9 +1305,6 @@ df_city20_21 = pd.merge(left=df_city20_21, left_on='City',
 
 # check work
 df_city20_21.head()
-
-
-
 
 # In[18]:
 
@@ -1381,7 +1406,10 @@ df_ret20_2.rename(columns={'Fiscal Year': 'FY',
 df_ret20_2 = df_ret20_2[df_ret20_2['FY'] == '2020'].reset_index()
 
 # exclude fy 20-21, 21-22 for now
-df_ret20_2.head(5)
+df_ret20_2.head()
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_ret20_2['City'] = df_ret20_2['City'].str.strip()
 
 # make replacements to fix known cityname issues
 df_ret20_2.replace(to_replace=to_replace, inplace=True)
@@ -1424,9 +1452,6 @@ df_city20_21.rename(columns={'Payment Amount': 'Benefits Paid to Retirees',
                     inplace=True)
 
 # df_city20_21.head()
-
-
-
 
 # In[19]:
 
@@ -1496,6 +1521,10 @@ df_stms20_21 = df_stms20_21[df_stms20_21['City'].isin(to_drop) == False]
 # df_stms20_21.columns
 
 # df_stms20_21.head()
+
+# strip whitespace from city field to avoid unnecessary issues when merging
+df_stms20_21['City'] = df_stms20_21['City'].str.strip()
+
 
 df_stms20_21_agg = df_stms20_21.groupby(['City']).agg({'Total Amount': 'sum'
                                                        }).reset_index()
